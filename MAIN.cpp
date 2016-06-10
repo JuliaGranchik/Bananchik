@@ -4,6 +4,7 @@
 #include "view.h"
 #include "mission.h"
 #include "menu.h"
+#include "timer.h"
 #include <iostream>
 #include <sstream>
 
@@ -140,6 +141,20 @@ int main()
 
 	Player p("banan.png", 45, 45, 50, 50);//гг = банан, координата Х,У, ширина, высота.
 
+	const int size = 40;
+
+	int hour = 2;
+	int min = 60;
+	int sec = 0;
+	bool timeForPlaying = true;
+
+	Text hourText("", font, size); Text minText("", font, size); Text secText("", font, size);//тексты дл€ часы/минуты/секунды
+	Text text1(":", font, size); text1.setColor(Color::Yellow);//двоеточие между цифрами
+
+	hourText.setColor(Color::Yellow); minText.setColor(Color::Yellow); secText.setColor(Color::Yellow);//цвет цифр
+	hourText.setPosition(100, 200); minText.setPosition(200, 200); secText.setPosition(300, 200);//координаты по€влени€ цифр
+
+
 
 	bool showMissionText = true;
 	randomMapGenerate();
@@ -170,7 +185,7 @@ int main()
 						playerScoreString << p.playerScore;
 						std::ostringstream task;//строка текста миссии
 						task << getTextMission(getCurrentMission(p.getplayercoordinateX()));//вызывается функция getTextMission (она возвращает текст миссии), которая принимает в качестве аргумента функцию getCurrentMission(возвращающую номер миссии), а уже эта ф-ция принимает в качестве аргумента функцию p.getplayercoordinateX() (эта ф-ция возвращает Икс координату игрока)
-						text.setString(task.str() + "\nВаши жизни: " + playerHealthString.str() + "\nНайдено любви:" + playerScoreString.str() + "\nВремя игры: " + gameTimeString.str());//задаем строку тексту и вызываем сформированную выше строку методом .str()
+						text.setString(task.str() + "\nВаши жизни: " + playerHealthString.str() + "\nНайдено любви:" + playerScoreString.str());//задаем строку тексту и вызываем сформированную выше строку методом .str()
 						text.setPosition(view.getCenter().x + 125, view.getCenter().y - 130);//позиция всего этого текстового блока
 						s_quest.setPosition(view.getCenter().x + 115, view.getCenter().y - 130);//позиция фона для блока
 						showMissionText = false;//эта строка позволяет убрать все что мы вывели на экране
@@ -218,13 +233,13 @@ int main()
 		}
 		if (!p.life)
 		{
-			text.setString("\n\n\n\nВы умерли.\nТак и не нашли \nлюбовь для банана.\nТеперь он будет \nгрустить:с");
+			text.setString("\n\n\n\nИгра окончена. \nБанан остался без любви.");
 			text.setPosition(view.getCenter().x - 200, view.getCenter().y - 100);//задаем позицию текста, отступая от центра камеры
 			window.draw(text);//рисую этот текст
 		}
 
 
-		p.update(time);//оживляем объект p класса Player с помощью времени, передавая время в качестве параметра функции update. благодаря этому персонаж может двигаться
+		p.update(time);
 		viewmap(time);//функция скроллинга карты, передаем ей время 
 		window.setView(view);//"оживляем" камеру в окне sfml
 		window.clear(Color(128, 106, 89));
@@ -241,16 +256,6 @@ int main()
 
 				window.draw(s_map);//рисуем квадратики на экран
 			}
-		/*
-		std::ostringstream playerHealthString, gameTimeString, playerScoreString;    // объявили переменную здоровья и времени
-		playerHealthString << p.health; gameTimeString << gameTime;
-		playerScoreString << p.playerScore;	
-		text.setString("Ваши жизни: " + playerHealthString.str() + "\nНайдено любви:" + playerScoreString.str() + "\nВремя игры: " + gameTimeString.str());//задаем строку тексту и вызываем сформированную выше строку методом .str()
-
-		text.setPosition(view.getCenter().x + 300, view.getCenter().y + 350);//задаем позицию текста, отступая от центра камеры
-		window.draw(text);//рисую этот текст
-		*/
-
 		if (p.hearts)
 		{
 			text.setString("ВЫ НАШЛИ ДЛЯ БАНАНА ДОСТАТОЧНО ЛЮБВИ!\nВЫ МОЛОДЕЦ!");
@@ -263,8 +268,28 @@ int main()
 		if (!showMissionText) {
 			text.setPosition(view.getCenter().x + 125, view.getCenter().y - 130);//позиция всего этого текстового блока
 			s_quest.setPosition(view.getCenter().x + 115, view.getCenter().y - 130);//позиция фона для блока			
-			window.draw(s_quest); window.draw(text); //рисуем спрайт свитка (фон для текста миссии). а затем и текст. все это завязано на логическую переменную, которая меняет свое состояние от нажатия клавиши ТАБ
+			window.draw(s_quest); window.draw(text); 
 		}
+		Sleep(10);// торможение 
+		if (event.key.code != Keyboard::Tab)
+		{
+			timer(hour, min, sec);//отнимает время
+		}
+
+		if (hour == 0 && min == 0)
+		{
+			p.life = false;
+
+		}
+
+
+		hourText.setString(intToString(hour)); minText.setString(intToString(min)); secText.setString(intToString(sec));// из int в string из string в Text
+
+		text1.setPosition(100, 800); window.draw(text1);
+		hourText.setPosition(70, 800);
+		window.draw(hourText); 
+		minText.setPosition(120, 800);
+		window.draw(minText); 
 
 		window.draw(p.sprite);//рисуем банан 
 		window.display();
